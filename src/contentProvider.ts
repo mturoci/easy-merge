@@ -7,15 +7,15 @@ import * as vscode from 'vscode';
 
 export default class MergeConflictContentProvider implements vscode.TextDocumentContentProvider, vscode.Disposable {
 
-  static scheme = 'merge-conflict.conflict-diff';
+  static schemeCurrent = 'merge-conflict.conflict-current';
+  static schemeIncoming = 'merge-conflict.conflict-incoming';
 
   constructor(private context: vscode.ExtensionContext) {
   }
 
   begin() {
-    this.context.subscriptions.push(
-      vscode.workspace.registerTextDocumentContentProvider(MergeConflictContentProvider.scheme, this)
-    );
+    this.context.subscriptions.push(vscode.workspace.registerTextDocumentContentProvider(MergeConflictContentProvider.schemeIncoming, this))
+    this.context.subscriptions.push(vscode.workspace.registerTextDocumentContentProvider(MergeConflictContentProvider.schemeCurrent, this))
   }
 
   dispose() { }
