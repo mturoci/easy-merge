@@ -3,15 +3,14 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import * as vscode from 'vscode';
+import * as vscode from 'vscode'
 
 export default class MergeConflictContentProvider implements vscode.TextDocumentContentProvider, vscode.Disposable {
 
-  static schemeCurrent = 'merge-conflict.conflict-current';
-  static schemeIncoming = 'merge-conflict.conflict-incoming';
+  static schemeCurrent = 'merge-conflict.conflict-current'
+  static schemeIncoming = 'merge-conflict.conflict-incoming'
 
-  constructor(private context: vscode.ExtensionContext) {
-  }
+  constructor(private context: vscode.ExtensionContext) { }
 
   begin() {
     this.context.subscriptions.push(vscode.workspace.registerTextDocumentContentProvider(MergeConflictContentProvider.schemeIncoming, this))
@@ -22,32 +21,27 @@ export default class MergeConflictContentProvider implements vscode.TextDocument
 
   async provideTextDocumentContent(uri: vscode.Uri): Promise<string | null> {
     try {
-      const { scheme, ranges } = JSON.parse(uri.query) as { scheme: string, ranges: [{ line: number, character: number }[], { line: number, character: number }[]][] };
+      const { scheme, ranges } = JSON.parse(uri.query) as { scheme: string, ranges: [{ line: number, character: number }[], { line: number, character: number }[]][] }
 
       // complete diff
-      const document = await vscode.workspace.openTextDocument(uri.with({ scheme, query: '' }));
+      const document = await vscode.workspace.openTextDocument(uri.with({ scheme, query: '' }))
 
-      let text = '';
-      let lastPosition = new vscode.Position(0, 0);
+      // HACK: Start with an extra newline if breadcrumbs is enabled.
+      let text = vscode.workspace.getConfiguration().get('breadcrumbs.enabled', true) ? '\n' : ''
+      let rowPointer = 0
+      ranges.forEach(([conflictRange]) => {
+        const [start, end] = conflictRange
+        text += '\n'.repeat(start.line - rowPointer)
+        text += document.getText(new vscode.Range(start.line, start.character, end.line, end.character))
+        rowPointer = end.line
+      })
+      text += '\n'.repeat(document.lineCount - rowPointer)
 
-      ranges.forEach(rangeObj => {
-        let [conflictRange, fullRange] = rangeObj;
-        const [start, end] = conflictRange;
-        const [fullStart, fullEnd] = fullRange;
-
-        text += document.getText(new vscode.Range(lastPosition.line, lastPosition.character, fullStart.line, fullStart.character));
-        text += document.getText(new vscode.Range(start.line, start.character, end.line, end.character));
-        lastPosition = new vscode.Position(fullEnd.line, fullEnd.character);
-      });
-
-      let documentEnd = document.lineAt(document.lineCount - 1).range.end;
-      text += document.getText(new vscode.Range(lastPosition.line, lastPosition.character, documentEnd.line, documentEnd.character));
-
-      return text;
+      return text
     }
     catch (ex) {
-      await vscode.window.showErrorMessage('Unable to show comparison');
-      return null;
+      await vscode.window.showErrorMessage('Unable to show comparison')
+      return null
     }
   }
 }
