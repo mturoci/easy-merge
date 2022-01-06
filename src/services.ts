@@ -3,11 +3,10 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 import * as vscode from 'vscode'
-import DocumentTracker from './documentTracker'
 import CodeLensProvider from './codelensProvider'
 import CommandHandler from './commandHandler'
 import ContentProvider from './contentProvider'
-import Decorator from './mergeDecorator'
+import DocumentTracker from './documentTracker'
 import * as interfaces from './interfaces'
 
 const configurationSectionName = 'merge-conflict'
@@ -28,7 +27,6 @@ export default class ServiceWrapper implements vscode.Disposable {
       new CommandHandler(documentTracker),
       new CodeLensProvider(documentTracker),
       new ContentProvider(this.context),
-      new Decorator(this.context, documentTracker),
     )
 
     this.services.forEach((service: any) => {
@@ -55,7 +53,7 @@ export default class ServiceWrapper implements vscode.Disposable {
     const enableCodeLens = workspaceConfiguration.get('codeLens.enabled', true)
     const enableDecorations = workspaceConfiguration.get('decorators.enabled', true)
 
-    return { enableCodeLens: true, enableDecorations, enableEditorOverview: enableDecorations }
+    return { enableCodeLens: true, enableDecorations: true, enableEditorOverview: true }
   }
 
   dispose() {
