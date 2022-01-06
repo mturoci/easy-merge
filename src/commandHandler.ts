@@ -44,7 +44,6 @@ export default class CommandHandler implements vscode.Disposable {
   }
 
   async compare(editor: vscode.TextEditor, conflict: interfaces.IDocumentMergeConflict | null) {
-
     // No conflict, command executed from command palette
     if (!conflict) {
       conflict = await this.findConflictContainingSelection(editor)

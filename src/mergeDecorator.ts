@@ -70,8 +70,6 @@ export default class MergeDecorator implements vscode.Disposable {
   }
 
   public applyDecorations(editor: vscode.TextEditor, conflicts: interfaces.IDocumentMergeConflict[], type: 'incoming' | 'current') {
-    // if (!this.config || (!this.config.enableDecorations && !this.config.enableEditorOverview)) return
-
     // If we have a pending scan from the same origin, exit early. (Cannot use this.tracker.isPending() because decorations are per editor.)
     if (!editor || this.updating.get(editor)) return
 
@@ -84,8 +82,7 @@ export default class MergeDecorator implements vscode.Disposable {
       }
 
       // Store decorations keyed by the type of decoration, set decoration wants a "style" to go with it, which will match this key (see constructor);
-      let matchDecorations: { [key: string]: vscode.Range[] } = {}
-
+      const matchDecorations: { [key: string]: vscode.Range[] } = {}
       const pushDecoration = (key: string, d: vscode.Range) => {
         matchDecorations[key] = matchDecorations[key] || []
         matchDecorations[key].push(d)
