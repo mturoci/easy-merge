@@ -13,7 +13,24 @@
     "onStartupFinished"
   ],
   "main": "./dist/extension.js",
-  "contributes": {},
+  "contributes": {
+    "commands": [
+      {
+        "command": "simple-merge.diff",
+        "title": "3 pane merge",
+        "icon": "$(git-merge)"
+      }
+    ],
+    "menus": {
+      "scm/resourceState/context": [
+        {
+          "command": "simple-merge.diff",
+          "when": "scmProvider == git && scmResourceGroup == merge",
+          "group": "inline"
+        }
+      ]
+    }
+  },
   "scripts": {
     "vscode:prepublish": "yarn run package",
     "compile": "webpack",

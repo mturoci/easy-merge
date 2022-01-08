@@ -50,42 +50,28 @@ export default class MergeConflictCodeLensProvider implements vscode.CodeLensPro
 
     const conflicts = await this.tracker.getConflicts(document)
     const conflictsCount = conflicts?.length ?? 0
-    vscode.commands.executeCommand("setContext", "mergeConflictsCount", conflictsCount)
+    await vscode.commands.executeCommand("setContext", "mergeConflictsCount", conflictsCount)
 
 
     const visibleEditors = vscode.window.visibleTextEditors
     if (visibleEditors.length === 3 && visibleEditors.every(e => e.document.fileName === document.fileName)) {
       const [_, conflictEditor] = visibleEditors
       const _conflicts = await this.tracker.getConflicts(conflictEditor.document)
-      return _conflicts.map(c => new vscode.CodeLens(c.range, {
-        command: "merge-conflict.compare-bro",
-        title: document.uri.scheme === ContentProvider.schemeCurrent ? '>>' : '<<',
-        arguments: [c],
+      const isCurrent = document.uri.scheme === ContentProvider.schemeCurrent
+      return _conflicts.map(conflict => new vscode.CodeLens(conflict.range, {
+        command: isCurrent ? 'merge-conflict.accept.current' : 'merge-conflict.accept.incoming',
+        title: isCurrent ? '>>' : '<<',
+        arguments: ["known-conflict", conflict],
       })
       )
     }
 
-    if (!conflictsCount) return null
-
-    // TODO: Remove.
-    let items: vscode.CodeLens[] = []
-    conflicts.forEach((conflict) => {
-      let diffCommand: vscode.Command = {
-        command: "merge-conflict.compare-bro",
-        title: "Compare Changes",
-        arguments: [conflict],
-      }
-
-      items.push(new vscode.CodeLens(conflict.range, diffCommand))
-    })
-
-    return items
+    return null
   }
 
   private registerCodeLensProvider() {
     this.codeLensRegistrationHandle = vscode.languages.registerCodeLensProvider(
       [
-        { scheme: "file" },
         { scheme: ContentProvider.schemeCurrent },
         { scheme: ContentProvider.schemeIncoming },
       ],

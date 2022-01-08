@@ -23,57 +23,36 @@ export default class CommandHandler implements vscode.Disposable {
   private tracker: interfaces.IDocumentMergeConflictTracker
   private decorator: MergeDecorator
 
-  constructor(trackerService: interfaces.IDocumentMergeConflictTrackerService) {
+  constructor(private context: vscode.ExtensionContext, trackerService: interfaces.IDocumentMergeConflictTrackerService) {
     this.tracker = trackerService.createTracker('commands')
     this.decorator = new MergeDecorator()
   }
 
   begin(config: interfaces.IExtensionConfiguration) {
-    this.disposables.push(this.registerTextEditorCommand('merge-conflict.compare-bro', this.compare))
+    this.context.subscriptions.push(vscode.commands.registerCommand('simple-merge.diff', this.diff.bind(this)))
     this.decorator.begin(config)
   }
 
-  private registerTextEditorCommand(command: string, cb: (editor: vscode.TextEditor, ...args: any[]) => Promise<void>, resourceCB?: (uris: vscode.Uri[]) => Promise<void>) {
-    return vscode.commands.registerCommand(command, (...args) => {
-      if (resourceCB && args.length && args.every(arg => arg && arg.resourceUri)) {
-        return resourceCB.call(this, args.map(arg => arg.resourceUri))
-      }
-      const editor = vscode.window.activeTextEditor
-      return editor && cb.call(this, editor, ...args)
-    })
-  }
+  async diff({ resourceUri }: vscode.SourceControlResourceState) {
+    const document = await vscode.workspace.openTextDocument(resourceUri)
+    const conflicts = await this.tracker.getConflicts(document)
 
-  async compare(editor: vscode.TextEditor, conflict: interfaces.IDocumentMergeConflict | null) {
-    // No conflict, command executed from command palette
-    if (!conflict) {
-      conflict = await this.findConflictContainingSelection(editor)
-
-      // Still failed to find conflict, warn the user and exit
-      if (!conflict) {
-        vscode.window.showWarningMessage('Editor cursor is not within a merge conflict')
-        return
-      }
-    }
-
-    const conflicts = await this.tracker.getConflicts(editor.document)
-
-    // Still failed to find conflict, warn the user and exit
     if (!conflicts) {
       vscode.window.showWarningMessage('Editor cursor is not within a merge conflict')
       return
     }
 
-    const scheme = editor.document.uri.scheme
+    const scheme = resourceUri.scheme
     let ranges = conflicts.map(conflict => [conflict.current.content, conflict.range])
 
-    const leftUri = editor.document.uri.with({ scheme: ContentProvider.schemeCurrent, query: JSON.stringify({ scheme, ranges }) })
+    const leftUri = document.uri.with({ scheme: ContentProvider.schemeCurrent, query: JSON.stringify({ scheme, ranges }) })
 
     ranges = conflicts.map(conflict => [conflict.incoming.content, conflict.range])
     const rightUri = leftUri.with({ scheme: ContentProvider.schemeIncoming, query: JSON.stringify({ scheme, ranges }) })
 
     await vscode.commands.executeCommand('workbench.action.closeActiveEditor')
     await vscode.commands.executeCommand('vscode.openWith', leftUri, 'default')
-    await vscode.commands.executeCommand('vscode.openWith', editor.document.uri, 'default', vscode.ViewColumn.Beside)
+    await vscode.commands.executeCommand('vscode.openWith', document.uri, 'default', vscode.ViewColumn.Beside)
     await vscode.commands.executeCommand('vscode.openWith', rightUri, 'default', vscode.ViewColumn.Beside)
 
     const [currentEditor, _, incomingEditor] = vscode.window.visibleTextEditors
