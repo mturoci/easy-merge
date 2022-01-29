@@ -6,6 +6,7 @@
 import * as vscode from "vscode"
 import * as interfaces from "./interfaces"
 import ContentProvider from './contentProvider'
+import store from "./store"
 
 export default class MergeConflictCodeLensProvider implements vscode.CodeLensProvider, vscode.Disposable {
   private codeLensRegistrationHandle?: vscode.Disposable | null
@@ -48,10 +49,10 @@ export default class MergeConflictCodeLensProvider implements vscode.CodeLensPro
   async provideCodeLenses(document: vscode.TextDocument, _token: vscode.CancellationToken): Promise<vscode.CodeLens[] | null> {
     if (!this.config || !this.config.enableCodeLens) return null
 
-    const visibleEditors = vscode.window.visibleTextEditors
-    if (visibleEditors.length === 3 && visibleEditors.every(e => e.document.fileName === document.fileName)) {
-      const [_, conflictEditor] = visibleEditors
-      const conflicts = await this.tracker.getConflicts(conflictEditor.document)
+    const visibleEditors = store.getEditors()
+    if (visibleEditors.length === 3 && visibleEditors.every(e => e?.document.fileName === document.fileName)) {
+      const [_, mergeEditor] = visibleEditors
+      const conflicts = await this.tracker.getConflicts(mergeEditor!.document)
       const isCurrent = document.uri.scheme === ContentProvider.schemeCurrent
       return conflicts.map(conflict => new vscode.CodeLens(
         // TODO: Offset based on breadcrumbs.

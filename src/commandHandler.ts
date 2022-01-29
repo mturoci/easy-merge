@@ -6,6 +6,7 @@ import * as vscode from 'vscode'
 import * as interfaces from './interfaces'
 import MergeDecorator from './decorator'
 import ContentProvider from './contentProvider'
+import Store from './store'
 
 interface IDocumentMergeConflictNavigationResults {
   canNavigate: boolean
@@ -53,7 +54,9 @@ export default class CommandHandler implements vscode.Disposable {
     await vscode.commands.executeCommand('vscode.openWith', document.uri, 'default', vscode.ViewColumn.Beside)
     await vscode.commands.executeCommand('vscode.openWith', rightUri, 'default', vscode.ViewColumn.Beside)
 
-    const [currentEditor, _, incomingEditor] = vscode.window.visibleTextEditors
+    const [currentEditor, mergeEditor, incomingEditor] = vscode.window.visibleTextEditors
+    Store.setEditors(currentEditor, mergeEditor, incomingEditor)
+
     this.decorator.applyDecorations(currentEditor, conflicts, 'current')
     this.decorator.applyDecorations(incomingEditor, conflicts, 'incoming')
   }

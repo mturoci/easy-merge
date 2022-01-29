@@ -1,5 +1,6 @@
 import * as vscode from 'vscode'
 import ContentProvider from './contentProvider'
+import Store from "./store"
 
 export class ScrollSync implements vscode.Disposable {
 
@@ -12,8 +13,9 @@ export class ScrollSync implements vscode.Disposable {
     this.disposable = vscode.window.onDidChangeTextEditorVisibleRanges(({ textEditor, visibleRanges }) => {
       const scheme = textEditor.document.uri.scheme
       if (!['file', ContentProvider.schemeCurrent, ContentProvider.schemeIncoming].includes(scheme)) return
-      const visibleEditors = vscode.window.visibleTextEditors
-      if (visibleEditors.length !== 3 || !visibleEditors.every(e => e.document.fileName === textEditor.document.fileName)) return
+      const visibleEditors = Store.getEditors()
+
+      if (visibleEditors.length !== 3 || !visibleEditors.every(e => e?.document.fileName === textEditor.document.fileName)) return
 
       if (this.scrollingEditor !== textEditor) {
         if (this.scrolledEditorsQueue.has(textEditor)) {
@@ -39,5 +41,4 @@ export class ScrollSync implements vscode.Disposable {
   dispose() {
     this.disposable.dispose()
   }
-
 }
