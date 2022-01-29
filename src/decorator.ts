@@ -90,10 +90,10 @@ export default class MergeDecorator implements vscode.Disposable {
 
       conflicts.forEach(conflict => {
         if (type === 'current' && !conflict.current.decoratorContent.isEmpty) {
-          pushDecoration('current.content', this.adjustDecoratorRange(conflict.current.decoratorContent))
+          pushDecoration('current.content', this.adjustCurrentDecoratorRange(conflict.range))
         }
         if (type === 'incoming' && !conflict.incoming.decoratorContent.isEmpty) {
-          pushDecoration('incoming.content', this.adjustDecoratorRange(conflict.incoming.decoratorContent))
+          pushDecoration('incoming.content', this.adjustCurrentDecoratorRange(conflict.range))
         }
 
         conflict.commonAncestors.forEach(commonAncestorsRegion => {
@@ -118,10 +118,13 @@ export default class MergeDecorator implements vscode.Disposable {
     }
   }
 
-  private adjustDecoratorRange(range: vscode.Range) {
-    return vscode.workspace.getConfiguration().get('breadcrumbs.enabled', true)
-      ? new vscode.Range(range.start.translate(1, 0), range.end.translate(1, 0))
-      : range
+  private adjustCurrentDecoratorRange(range: vscode.Range) {
+    let startOffset = 0, endOffset = -1
+    if (vscode.workspace.getConfiguration().get('breadcrumbs.enabled', true)) {
+      startOffset = 1
+      endOffset = 0
+    }
+    return new vscode.Range(range.start.translate(startOffset, 0), range.end.translate(endOffset, 0))
   }
 
   private removeDecorations(editor: vscode.TextEditor) {

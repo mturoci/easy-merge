@@ -48,22 +48,18 @@ export default class MergeConflictCodeLensProvider implements vscode.CodeLensPro
   async provideCodeLenses(document: vscode.TextDocument, _token: vscode.CancellationToken): Promise<vscode.CodeLens[] | null> {
     if (!this.config || !this.config.enableCodeLens) return null
 
-    const conflicts = await this.tracker.getConflicts(document)
-    const conflictsCount = conflicts?.length ?? 0
-    await vscode.commands.executeCommand("setContext", "mergeConflictsCount", conflictsCount)
-
-
     const visibleEditors = vscode.window.visibleTextEditors
     if (visibleEditors.length === 3 && visibleEditors.every(e => e.document.fileName === document.fileName)) {
       const [_, conflictEditor] = visibleEditors
-      const _conflicts = await this.tracker.getConflicts(conflictEditor.document)
+      const conflicts = await this.tracker.getConflicts(conflictEditor.document)
       const isCurrent = document.uri.scheme === ContentProvider.schemeCurrent
-      return _conflicts.map(conflict => new vscode.CodeLens(conflict.range, {
+      return conflicts.map(conflict => new vscode.CodeLens(
+        // TODO: Offset based on breadcrumbs.
+        new vscode.Range(conflict.range.start.translate(1, 0), conflict.range.end), {
         command: isCurrent ? 'merge-conflict.accept.current' : 'merge-conflict.accept.incoming',
         title: isCurrent ? '>>' : '<<',
         arguments: ["known-conflict", conflict],
-      })
-      )
+      }))
     }
 
     return null

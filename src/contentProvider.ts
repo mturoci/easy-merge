@@ -5,7 +5,7 @@
 
 import * as vscode from 'vscode'
 
-export default class MergeConflictContentProvider implements vscode.TextDocumentContentProvider, vscode.Disposable {
+export default class ContentProvider implements vscode.TextDocumentContentProvider, vscode.Disposable {
 
   static schemeCurrent = 'merge-conflict.conflict-current'
   static schemeIncoming = 'merge-conflict.conflict-incoming'
@@ -13,29 +13,30 @@ export default class MergeConflictContentProvider implements vscode.TextDocument
   constructor(private context: vscode.ExtensionContext) { }
 
   begin() {
-    this.context.subscriptions.push(vscode.workspace.registerTextDocumentContentProvider(MergeConflictContentProvider.schemeIncoming, this))
-    this.context.subscriptions.push(vscode.workspace.registerTextDocumentContentProvider(MergeConflictContentProvider.schemeCurrent, this))
+    this.context.subscriptions.push(vscode.workspace.registerTextDocumentContentProvider(ContentProvider.schemeIncoming, this))
+    this.context.subscriptions.push(vscode.workspace.registerTextDocumentContentProvider(ContentProvider.schemeCurrent, this))
   }
 
   dispose() { }
 
   async provideTextDocumentContent(uri: vscode.Uri): Promise<string | null> {
     try {
-      const { scheme, ranges } = JSON.parse(uri.query) as { scheme: string, ranges: [{ line: number, character: number }[], { line: number, character: number }[]][] }
+      const { ranges } = JSON.parse(uri.query) as { ranges: [{ line: number, character: number }[], { line: number, character: number }[]][] }
 
-      // complete diff
-      const document = await vscode.workspace.openTextDocument(uri.with({ scheme, query: '' }))
+      const document = await vscode.workspace.openTextDocument(uri.with({ scheme: 'file', query: '' }))
 
       // HACK: Start with an extra newline if breadcrumbs is enabled.
       let text = vscode.workspace.getConfiguration().get('breadcrumbs.enabled', true) ? '\n' : ''
       let rowPointer = 0
-      ranges.forEach(([conflictRange]) => {
+      ranges.forEach(([conflictRange, wholeRange]) => {
         const [start, end] = conflictRange
-        text += '\n'.repeat(start.line - rowPointer)
+        const [startWhole] = wholeRange
+        const padding = startWhole.line - rowPointer
+        text += '\n'.repeat(padding)
         text += document.getText(new vscode.Range(start.line, start.character, end.line, end.character))
-        rowPointer = end.line
+        rowPointer += padding + (end.line - start.line)
       })
-      text += '\n'.repeat(document.lineCount - rowPointer)
+      text += '\n'.repeat(document.lineCount - rowPointer - 1)
 
       return text
     }

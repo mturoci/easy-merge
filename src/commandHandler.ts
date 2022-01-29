@@ -4,8 +4,8 @@
  *--------------------------------------------------------------------------------------------*/
 import * as vscode from 'vscode'
 import * as interfaces from './interfaces'
+import MergeDecorator from './decorator'
 import ContentProvider from './contentProvider'
-import MergeDecorator from './mergeDecorator'
 
 interface IDocumentMergeConflictNavigationResults {
   canNavigate: boolean
@@ -42,13 +42,11 @@ export default class CommandHandler implements vscode.Disposable {
       return
     }
 
-    const scheme = resourceUri.scheme
-    let ranges = conflicts.map(conflict => [conflict.current.content, conflict.range])
+    let ranges = conflicts.map(c => [c.current.content, c.range])
+    const leftUri = document.uri.with({ scheme: ContentProvider.schemeCurrent, query: JSON.stringify({ ranges }) })
 
-    const leftUri = document.uri.with({ scheme: ContentProvider.schemeCurrent, query: JSON.stringify({ scheme, ranges }) })
-
-    ranges = conflicts.map(conflict => [conflict.incoming.content, conflict.range])
-    const rightUri = leftUri.with({ scheme: ContentProvider.schemeIncoming, query: JSON.stringify({ scheme, ranges }) })
+    ranges = conflicts.map(c => [c.incoming.content, c.range])
+    const rightUri = leftUri.with({ scheme: ContentProvider.schemeIncoming, query: JSON.stringify({ ranges }) })
 
     await vscode.commands.executeCommand('workbench.action.closeActiveEditor')
     await vscode.commands.executeCommand('vscode.openWith', leftUri, 'default')
