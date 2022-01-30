@@ -6,7 +6,7 @@ import * as vscode from 'vscode'
 import * as interfaces from './interfaces'
 import MergeDecorator from './decorator'
 import ContentProvider from './contentProvider'
-import Store from './store'
+import store from './store'
 
 interface IDocumentMergeConflictNavigationResults {
   canNavigate: boolean
@@ -31,6 +31,7 @@ export default class CommandHandler implements vscode.Disposable {
 
   begin(config: interfaces.IExtensionConfiguration) {
     this.context.subscriptions.push(vscode.commands.registerCommand('simple-merge.diff', this.diff.bind(this)))
+    this.context.subscriptions.push(vscode.commands.registerCommand('simple-merge.accept', this.accept.bind(this)))
     this.decorator.begin(config)
   }
 
@@ -55,10 +56,15 @@ export default class CommandHandler implements vscode.Disposable {
     await vscode.commands.executeCommand('vscode.openWith', rightUri, 'default', vscode.ViewColumn.Beside)
 
     const [currentEditor, mergeEditor, incomingEditor] = vscode.window.visibleTextEditors
-    Store.setEditors(currentEditor, mergeEditor, incomingEditor)
+    store.setEditors(currentEditor, mergeEditor, incomingEditor)
 
     this.decorator.applyDecorations(currentEditor, conflicts, 'current')
     this.decorator.applyDecorations(incomingEditor, conflicts, 'incoming')
+  }
+
+  private async accept(conflict: interfaces.IDocumentMergeConflict, commitType: interfaces.CommitType) {
+    const [_, mergeEditor] = store.getEditors()
+    if (mergeEditor) conflict.commitEdit(commitType, mergeEditor)
   }
 
   navigateNext(editor: vscode.TextEditor): Promise<void> {
@@ -137,36 +143,6 @@ export default class CommandHandler implements vscode.Disposable {
     // Move the selection to the first line of the conflict
     editor.selection = new vscode.Selection(navigationResult.conflict.range.start, navigationResult.conflict.range.start)
     editor.revealRange(navigationResult.conflict.range, vscode.TextEditorRevealType.Default)
-  }
-
-  private async accept(type: interfaces.CommitType, editor: vscode.TextEditor, ...args: any[]): Promise<void> {
-
-    let conflict: interfaces.IDocumentMergeConflict | null
-
-    // If launched with known context, take the conflict from that
-    if (args[0] === 'known-conflict') {
-      conflict = args[1]
-    }
-    else {
-      // Attempt to find a conflict that matches the current cursor position
-      conflict = await this.findConflictContainingSelection(editor)
-    }
-
-    if (!conflict) {
-      vscode.window.showWarningMessage('Editor cursor is not within a merge conflict')
-      return
-    }
-
-    // Tracker can forget as we know we are going to do an edit
-    this.tracker.forget(editor.document)
-    conflict.commitEdit(type, editor)
-
-    // navigate to the next merge conflict
-    const mergeConflictConfig = vscode.workspace.getConfiguration('merge-conflict')
-    if (mergeConflictConfig.get<boolean>('autoNavigateNextConflict.enabled')) {
-      this.navigateNext(editor)
-    }
-
   }
 
   private async findConflictContainingSelection(editor: vscode.TextEditor, conflicts?: interfaces.IDocumentMergeConflict[]): Promise<interfaces.IDocumentMergeConflict | null> {

@@ -57,9 +57,9 @@ export default class MergeConflictCodeLensProvider implements vscode.CodeLensPro
       return conflicts.map(conflict => new vscode.CodeLens(
         // TODO: Offset based on breadcrumbs.
         new vscode.Range(conflict.range.start.translate(1, 0), conflict.range.end), {
-        command: isCurrent ? 'merge-conflict.accept.current' : 'merge-conflict.accept.incoming',
+        command: 'simple-merge.accept',
         title: isCurrent ? '>>' : '<<',
-        arguments: ["known-conflict", conflict],
+        arguments: [conflict, isCurrent ? interfaces.CommitType.Current : interfaces.CommitType.Incoming],
       }))
     }
 
