@@ -29,10 +29,10 @@ export default class CommandHandler implements vscode.Disposable {
     this.decorator = new MergeDecorator()
   }
 
-  begin(config: interfaces.IExtensionConfiguration) {
+  begin() {
     this.context.subscriptions.push(vscode.commands.registerCommand('simple-merge.diff', this.diff.bind(this)))
     this.context.subscriptions.push(vscode.commands.registerCommand('simple-merge.accept', this.accept.bind(this)))
-    this.decorator.begin(config)
+    this.decorator.begin()
   }
 
   async diff({ resourceUri }: vscode.SourceControlResourceState) {

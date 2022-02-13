@@ -8,20 +8,16 @@ import * as interfaces from './interfaces'
 export default class MergeDecorator implements vscode.Disposable {
 
   private decorations: { [key: string]: vscode.TextEditorDecorationType } = {};
-
-  private config?: interfaces.IExtensionConfiguration
   private updating = new Map<vscode.TextEditor, boolean>();
 
   constructor() { }
 
-  begin(config: interfaces.IExtensionConfiguration) {
-    this.config = config
-    this.registerDecorationTypes(config)
+  begin() {
+    this.registerDecorationTypes()
   }
 
-  configurationUpdated(config: interfaces.IExtensionConfiguration) {
-    this.config = config
-    this.registerDecorationTypes(config)
+  configurationUpdated() {
+    this.registerDecorationTypes()
 
     // TODO: Handle.
     // Re-apply the decoration
@@ -31,14 +27,10 @@ export default class MergeDecorator implements vscode.Disposable {
     // })
   }
 
-  private registerDecorationTypes(config: interfaces.IExtensionConfiguration) {
-
+  private registerDecorationTypes() {
     // Dispose of existing decorations.
     Object.keys(this.decorations).forEach(k => this.decorations[k].dispose())
     this.decorations = {}
-
-    // None of our features are enabled.
-    if (!config.enableDecorations || !config.enableEditorOverview) return
 
     this.decorations['current.content'] = vscode.window.createTextEditorDecorationType(
       this.generateBlockRenderOptions('merge.currentContentBackground', 'editorOverviewRuler.currentContentForeground')

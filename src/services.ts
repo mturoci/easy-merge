@@ -10,8 +10,6 @@ import ContentProvider from './contentProvider'
 import DocumentTracker from './documentTracker'
 import * as interfaces from './interfaces'
 
-const configurationSectionName = 'merge-conflict'
-
 export default class ServiceWrapper implements vscode.Disposable {
 
   private services: vscode.Disposable[] = [];
@@ -47,14 +45,6 @@ export default class ServiceWrapper implements vscode.Disposable {
   }
 
   createExtensionConfiguration(): interfaces.IExtensionConfiguration {
-    const workspaceConfiguration = vscode.workspace.getConfiguration(configurationSectionName)
-    // Disable original built-in extension.
-    workspaceConfiguration.update('codeLens.enabled', false, true)
-    workspaceConfiguration.update('decorators.enabled', false, true)
-
-    const enableCodeLens = workspaceConfiguration.get('codeLens.enabled', true)
-    const enableDecorations = workspaceConfiguration.get('decorators.enabled', true)
-
     return { enableCodeLens: true, enableDecorations: true, enableEditorOverview: true }
   }
 

@@ -15,13 +15,10 @@ export default class MergeConflictCodeLensProvider implements vscode.CodeLensPro
 
   constructor(trackerService: interfaces.IDocumentMergeConflictTrackerService) {
     this.tracker = trackerService.createTracker("codelens")
+    this.registerCodeLensProvider()
   }
 
-  begin(config: interfaces.IExtensionConfiguration) {
-    this.config = config
-    if (this.config.enableCodeLens) this.registerCodeLensProvider()
-  }
-
+  // TODO: Remove once - find out why it breaks codelens registration.
   configurationUpdated(updatedConfig: interfaces.IExtensionConfiguration) {
     if (
       updatedConfig.enableCodeLens === false &&
