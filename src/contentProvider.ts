@@ -26,7 +26,7 @@ export default class ContentProvider implements vscode.TextDocumentContentProvid
       const document = await vscode.workspace.openTextDocument(uri.with({ scheme: 'file', query: '' }))
 
       // HACK: Start with an extra newline if breadcrumbs is enabled.
-      let text = vscode.workspace.getConfiguration().get('breadcrumbs.enabled', true) ? '\n' : ''
+      let text = vscode.workspace.getConfiguration().get('breadcrumbs.enabled', true) ? '\n\n' : ''
       let rowPointer = 0
       ranges.forEach(([conflictRange, wholeRange]) => {
         const [start, end] = conflictRange

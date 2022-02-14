@@ -10,8 +10,6 @@ export default class MergeDecorator implements vscode.Disposable {
   private decorations: { [key: string]: vscode.TextEditorDecorationType } = {};
   private updating = new Map<vscode.TextEditor, boolean>();
 
-  constructor() { }
-
   begin() {
     this.registerDecorationTypes()
   }
