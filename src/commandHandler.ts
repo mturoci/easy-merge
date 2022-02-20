@@ -44,11 +44,11 @@ export default class CommandHandler implements vscode.Disposable {
       return
     }
 
-    let ranges = conflicts.map(c => [c.current.content, c.range])
-    const leftUri = document.uri.with({ scheme: ContentProvider.schemeCurrent, query: JSON.stringify({ ranges }) })
+    let ignoreRanges = conflicts.map(c => [c.incoming.content, c.range])
+    const leftUri = document.uri.with({ scheme: ContentProvider.schemeCurrent, query: JSON.stringify({ ranges: ignoreRanges }) })
 
-    ranges = conflicts.map(c => [c.incoming.content, c.range])
-    const rightUri = leftUri.with({ scheme: ContentProvider.schemeIncoming, query: JSON.stringify({ ranges }) })
+    ignoreRanges = conflicts.map(c => [c.current.content, c.range])
+    const rightUri = leftUri.with({ scheme: ContentProvider.schemeIncoming, query: JSON.stringify({ ranges: ignoreRanges }) })
 
     await vscode.commands.executeCommand('workbench.action.closeActiveEditor')
     await vscode.commands.executeCommand('vscode.openWith', leftUri, 'default')
