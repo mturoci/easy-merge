@@ -33,9 +33,9 @@ export default class CommandHandler implements vscode.Disposable {
   }
 
   begin() {
-    this.context.subscriptions.push(vscode.commands.registerCommand('simple-merge.diff', this.diff.bind(this)))
-    this.context.subscriptions.push(vscode.commands.registerCommand('simple-merge.accept', this.accept.bind(this)))
-    this.context.subscriptions.push(vscode.commands.registerCommand('simple-merge.finish', this.finish.bind(this)))
+    this.context.subscriptions.push(vscode.commands.registerCommand('easy-merge.diff', this.diff.bind(this)))
+    this.context.subscriptions.push(vscode.commands.registerCommand('easy-merge.accept', this.accept.bind(this)))
+    this.context.subscriptions.push(vscode.commands.registerCommand('easy-merge.finish', this.finish.bind(this)))
     this.decorator.begin()
   }
 
@@ -48,7 +48,7 @@ export default class CommandHandler implements vscode.Disposable {
       return
     }
 
-    await vscode.commands.executeCommand('setContext', 'simple-merge.diffing', true)
+    await vscode.commands.executeCommand('setContext', 'easy-merge.diffing', true)
     let ignoreRanges = conflicts.map(c => [c.incoming.content, c.range])
     const leftUri = document.uri.with({ scheme: ContentProvider.schemeCurrent, query: JSON.stringify({ ranges: ignoreRanges }) })
 
@@ -79,7 +79,7 @@ export default class CommandHandler implements vscode.Disposable {
     await vscode.commands.executeCommand('workbench.action.closeActiveEditor')
     await vscode.commands.executeCommand('workbench.action.closeActiveEditor')
     await vscode.commands.executeCommand('workbench.action.closeActiveEditor')
-    await vscode.commands.executeCommand('setContext', 'simple-merge.diffing', false)
+    await vscode.commands.executeCommand('setContext', 'easy-merge.diffing', false)
   }
 
   private async accept(conflict: interfaces.IDocumentMergeConflict, commitType: interfaces.CommitType) {

@@ -1,6 +1,6 @@
 {
-  "name": "simple-merge",
-  "displayName": "simple-merge",
+  "name": "easy-merge",
+  "displayName": "easy-merge",
   "description": "Alternative way of merging files in VSCode.",
   "version": "0.0.1",
   "engines": {
@@ -16,12 +16,12 @@
   "contributes": {
     "commands": [
       {
-        "command": "simple-merge.diff",
+        "command": "easy-merge.diff",
         "title": "3 pane merge",
         "icon": "$(git-merge)"
       },
       {
-        "command": "simple-merge.finish",
+        "command": "easy-merge.finish",
         "title": "Finish merge",
         "icon": "$(check)"
       }
@@ -29,14 +29,14 @@
     "menus": {
       "editor/title": [
         {
-          "command": "simple-merge.finish",
-          "when": "!editorReadonly && simple-merge.diffing",
+          "command": "easy-merge.finish",
+          "when": "!editorReadonly && easy-merge.diffing",
           "group": "navigation"
         }
       ],
       "scm/resourceState/context": [
         {
-          "command": "simple-merge.diff",
+          "command": "easy-merge.diff",
           "when": "scmProvider == git && scmResourceGroup == merge",
           "group": "inline"
         }
