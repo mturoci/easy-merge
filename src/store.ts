@@ -14,11 +14,6 @@ class Store {
 
   public getEditors() {
     return [this.currentEditor, this.mergeEditor, this.incomingEditor]
-    // return {
-    //   currentEditor: this.currentEditor,
-    //   mergeEditor: this.mergeEditor,
-    //   incomingEditor: this.incomingEditor,
-    // }
   }
 }
 
