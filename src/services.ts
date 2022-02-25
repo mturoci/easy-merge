@@ -51,5 +51,6 @@ export default class ServiceWrapper implements vscode.Disposable {
   dispose() {
     this.services.forEach(disposable => disposable.dispose())
     this.services = []
+    this.context.subscriptions.forEach(s => s.dispose())
   }
 }

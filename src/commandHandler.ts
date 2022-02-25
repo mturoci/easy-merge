@@ -70,21 +70,23 @@ export default class CommandHandler implements vscode.Disposable {
     const document = await vscode.workspace.openTextDocument(uri)
     const conflicts = await this.tracker.getConflicts(document)
 
-    if (conflicts) {
+    if (conflicts.length) {
       const answer = await vscode.window.showWarningMessage(modalWarning, { modal: true }, "Yes")
       if (answer !== 'Yes') return
     }
 
     await promiseExec(`git add ${uri.fsPath}`, { cwd: vscode.workspace.workspaceFolders![0].uri.fsPath })
-    await vscode.commands.executeCommand('workbench.action.closeActiveEditor')
-    await vscode.commands.executeCommand('workbench.action.closeActiveEditor')
-    await vscode.commands.executeCommand('workbench.action.closeActiveEditor')
+    // TODO: Resolve this deprecated method use.
+    store.getEditors().forEach(e => e?.hide())
     await vscode.commands.executeCommand('setContext', 'easy-merge.diffing', false)
   }
 
   private async accept(conflict: interfaces.IDocumentMergeConflict, commitType: interfaces.CommitType) {
     const [_, mergeEditor] = store.getEditors()
-    if (mergeEditor) conflict.commitEdit(commitType, mergeEditor)
+    if (mergeEditor) {
+      conflict.commitEdit(commitType, mergeEditor)
+      mergeEditor.document.save()
+    }
   }
 
   dispose() { }
