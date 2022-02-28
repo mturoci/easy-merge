@@ -3,6 +3,7 @@
   "displayName": "easy-merge",
   "description": "Alternative way of merging files in VSCode.",
   "version": "0.0.1",
+  "icon": "resources/logo128x128.jpg",
   "engines": {
     "vscode": "^1.62.0"
   },
@@ -18,7 +19,7 @@
       {
         "command": "easy-merge.diff",
         "title": "3 pane merge",
-        "icon": "$(git-merge)"
+        "icon": "resources/easy-merge-icon.svg"
       },
       {
         "command": "easy-merge.finish",

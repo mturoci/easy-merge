@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<svg viewBox="441.173 185 130 130" xmlns="http://www.w3.org/2000/svg" xmlns:bx="https://boxy-svg.com">
+  <defs>
+    <style bx:fonts="Fira Code">@import url(https://fonts.googleapis.com/css2?family=Fira+Code%3Aital%2Cwght%400%2C300%3B0%2C400%3B0%2C500%3B0%2C600%3B0%2C700&amp;display=swap);</style>
+  </defs>
+  <rect x="185.408" y="141" width="130" height="130" style="stroke: rgb(0, 0, 0); stroke-width: 0px; fill: rgb(26, 32, 55);" transform="matrix(1, 0, 0, 1, 255.764847, 44.000008)"/>
+  <path d="M 496.475 198.682 L 515.7 198.682 C 509.241 227.961 508.527 244.749 515.7 274.028 L 496.475 274.028 C 503.343 244.751 503.236 227.962 496.475 198.682 L 496.475 198.682 Z M 487.592 240.531 L 472.366 260.231 L 463.913 253.442 L 472.626 241.77 L 444.647 241.778 L 444.647 230.958 L 472.634 230.944 L 463.921 219.264 L 472.375 212.476 L 487.443 231.974 C 489.964 235.232 490.165 237.2 487.592 240.531 L 487.592 240.531 Z M 524.583 240.531 L 539.809 260.231 L 548.262 253.442 L 539.547 241.77 L 567.526 241.778 L 567.526 230.958 L 539.54 230.944 L 548.254 219.264 L 539.8 212.476 L 524.732 231.974 C 522.21 235.232 522.009 237.2 524.583 240.531 L 524.583 240.531 Z" style="paint-order: fill; stroke-miterlimit: 1; stroke-linecap: square; stroke-width: 0px; fill-rule: evenodd; fill: rgb(69, 204, 203);" bx:origin="0.500004 0.68685"/>
+  <text style="fill: rgb(227, 227, 227); font-family: &quot;Fira Code&quot;; font-size: 16px; font-weight: 700; letter-spacing: 3.1px; word-spacing: -7.3px; white-space: pre;" x="448.007" y="296.17">EASY MERGE</text>
+</svg>
