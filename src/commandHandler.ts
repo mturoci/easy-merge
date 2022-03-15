@@ -40,6 +40,9 @@ export default class CommandHandler implements vscode.Disposable {
   }
 
   async diff({ resourceUri }: vscode.SourceControlResourceState) {
+    const activeEditors = store.getEditors()
+    if (activeEditors.length) activeEditors.forEach(e => e?.hide())
+
     const document = await vscode.workspace.openTextDocument(resourceUri)
     const conflicts = await this.tracker.getConflicts(document)
 

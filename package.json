@@ -4,6 +4,7 @@
   "description": "Alternative way of merging files in VSCode.",
   "version": "0.0.1",
   "icon": "resources/logo128x128.jpg",
+  "repository": "https://github.com/MartinTuroci/easy-merge",
   "engines": {
     "vscode": "^1.62.0"
   },
