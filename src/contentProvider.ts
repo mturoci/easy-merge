@@ -36,7 +36,7 @@ export default class ContentProvider implements vscode.TextDocumentContentProvid
         else if (invalidLines.has(idx + 1)) newLinesCount++
         else if (documentLine.startsWith(endFooterMarker)) {
           acc.push('\n'.repeat(newLinesCount))
-          newLinesCount = 0
+          newLinesCount = 1
         }
         return acc
       }, [] as string[]).join('\n')

@@ -12,6 +12,8 @@ export default class MergeConflictCodeLensProvider implements vscode.CodeLensPro
   private codeLensRegistrationHandle?: vscode.Disposable | null
   private config?: interfaces.IExtensionConfiguration
   private tracker: interfaces.IDocumentMergeConflictTracker
+  private existingCodelens: { file: string, lenses: vscode.CodeLens[] } | null = null
+  private executingCodeLens = false
 
   constructor(trackerService: interfaces.IDocumentMergeConflictTrackerService) {
     this.tracker = trackerService.createTracker("codelens")
@@ -44,20 +46,29 @@ export default class MergeConflictCodeLensProvider implements vscode.CodeLensPro
   }
 
   async provideCodeLenses(document: vscode.TextDocument, _token: vscode.CancellationToken): Promise<vscode.CodeLens[] | null> {
-    if (!this.config || !this.config.enableCodeLens) return null
+    if (!this.config || !this.config.enableCodeLens || this.executingCodeLens) return null
 
     const visibleEditors = store.getEditors()
     if (visibleEditors.length === 3 && visibleEditors.every(e => e?.document.fileName === document.fileName)) {
+      if (!this.existingCodelens || this.existingCodelens.file !== document.uri.path) {
+        this.executingCodeLens = true
+        const lenses = await vscode.commands.executeCommand<vscode.CodeLens[]>('vscode.executeCodeLensProvider', visibleEditors[1]?.document.uri) || []
+        this.existingCodelens = {
+          file: document.uri.path,
+          lenses: lenses.filter(({ command }) => !command?.command.startsWith('merge-conflict'))
+        }
+        this.executingCodeLens = false
+      }
       const [_, mergeEditor] = visibleEditors
       const conflicts = await this.tracker.getConflicts(mergeEditor!.document)
       const isCurrent = document.uri.scheme === ContentProvider.schemeCurrent
-      return conflicts.map(conflict => new vscode.CodeLens(
+      return [...this.existingCodelens.lenses, ...conflicts.map(conflict => new vscode.CodeLens(
         // TODO: Offset based on breadcrumbs.
         new vscode.Range(conflict.range.start.translate(1, 0), conflict.range.end), {
         command: 'easy-merge.accept',
         title: isCurrent ? '>>' : '<<',
         arguments: [conflict, isCurrent ? interfaces.CommitType.Current : interfaces.CommitType.Incoming],
-      }))
+      }))]
     }
 
     return null

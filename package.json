@@ -20,7 +20,7 @@
       {
         "command": "easy-merge.diff",
         "title": "3 pane merge",
-        "icon": "resources/easy-merge-icon.svg"
+        "icon": "$(git-merge)"
       },
       {
         "command": "easy-merge.finish",
